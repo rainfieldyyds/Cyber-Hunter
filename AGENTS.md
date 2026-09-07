@@ -1,6 +1,6 @@
 # AGENTS.md — cyberpunk（Unity 2D 动作游戏工程）
 
-> 本文件面向在此仓库工作的代码 Agent 与协作者。以下内容均基于当前工程文件逐项核对，核对日期：2026-09-06。若后续引擎版本、包或目录发生变化，请同步更新本文件。
+> 本文件面向在此仓库工作的代码 Agent 与协作者。以下内容均基于当前工程文件逐项核对，最近一次更新：2026-09-07（SampleScene 第一阶段整理后）。若后续引擎版本、包或目录发生变化，请同步更新本文件。
 
 ## 1. 项目信息
 
@@ -59,6 +59,7 @@ Assets 顶层按中文资源类别组织（文件数为非 `.meta` 文件数）�
 | `Assets/Font/` | 自定义字体 `Silver.ttf` 与 `Silver SDF.asset` |
 | `Assets/music/` | BGM/SFX（mp3/wav，文件名即用途） |
 | `Assets/` 根目录 | Animator Controller（`Avatar Controller`、`Boss Controller`、`Enemy Controller`、`Enemy Controller2`、`Npc Controller`、`Title Controller`）与 `master.mixer` 音频混合器 |
+| `Assets/Editor/` | 编辑器整理工具 `SceneOrganizerTool.cs`（Tools → Scene Organizer 菜单，供后续场景整理复用） |
 | `Assets/Hero_Knight/` | 第三方骑士素材包（含动画/精灵/Demo 场景） |
 | `Assets/TextMesh Pro/` | TMP Essentials 导入资源（字体、着色器、设置） |
 
@@ -83,6 +84,7 @@ Assets 顶层按中文资源类别组织（文件数为非 `.meta` 文件数）�
 ## 3. 场景与 Prefab 注意事项
 
 - **本项目目前没有 Prefab**：Boss、敌人、路面、背景等大量对象是直接放在 `SampleScene` 里的场景对象，且存在大量复制实例（如 `enemy1 (15)`、`street1 (12)`、`enemydied`）以及未命名子物体。不要假设同名对象有 Prefab 联动；改动前先确认目标引用。
+- **SampleScene 已完成第一阶段层级整理（2026-09-07）**：顶层根物体收敛为 `_Player`、`_NPC`、`_Enemies`、`_Boss`、`_Environment`、`_Background`、`_Triggers`、`_UI`、`_Audio`、`_Systems`、`_Cameras` 分组容器；原 `enemys1`/`enemydieds` 系列容器已改名为 `Enemies_Active`/`Enemies_Dead*`。`GameManager`（RespawnManager，`DontDestroyOnLoad`）刻意保持为根物体，不得移入分组。后续场景改动请维持该层级约定。
 - 新做可复用对象时优先创建 Prefab；若要把现有场景对象转为 Prefab，请在 Unity 编辑器内完成（Pack Prefab 并核对引用），不要在文本层手工迁移。
 - **主相机组成**（`SampleScene`）：`Main Camera` 同时挂 AudioListener、正交 Camera、Pixel Perfect Camera（PPU=2、参考分辨率 1920×1080、像素吸附开启）、Cinemachine Brain、`BossCameraController`；子物体 `Virtual Camera`（Cinemachine）默认跟随玩家。`BossCameraController` 在 Boss 战切换其 `Follow` 到 `bossCameraPoint`，Boss 结束切回玩家。
 - **Boss 战触发链**：玩家进入 `BossTrigger` → `BossStartTrigger` 一次性触发：`BossCameraController.StartBossCamera()`、`BossGateController.LockBossRoom()`（前后门关闭）、启用 `BossAI`、显示血条、切换 Boss 音乐、停止普通 BGM。Boss 死亡后 `BossHealth` 写 `GameStateManager.instance.bossDead` 并解锁房间。涉及组件互相以 Inspector 引用绑定，删对象/改字段前要沿着引用链检查。
@@ -117,4 +119,4 @@ Assets 顶层按中文资源类别组织（文件数为非 `.meta` 文件数）�
 - 仓库根目录已有 `.gitignore`（排除 `Library/ Temp/ Obj/ Logs/ UserSettings/ Build/` 等生成物，详见该文件注释）。
 - 需要提交：`Assets/`（含全部 `.meta`）、`Packages/manifest.json`、`Packages/packages-lock.json`、`ProjectSettings/`、`.gitignore`、`AGENTS.md`。
 - 不需要提交：`.csproj/.sln`（Unity/IDE 生成）、`Library/ Temp/ Logs/ UserSettings/`、构建产物。
-- 当前检查时根目录尚未 `git init`；接入版本控制时先在根目录初始化，并确认生成目录未被加入索引。
+- 仓库已初始化并有基线提交；接入或提交时继续遵循上述目录约定，并确认生成目录未被加入索引。
